@@ -1,5 +1,6 @@
 import QtQuick 2.15
 import QtQuick.Layouts 1.15
+import QtQuick.Controls 1.4
 
 import org.kde.plasma.plasmoid 2.0
 import org.kde.plasma.core 2.0 as PlasmaCore
@@ -139,6 +140,62 @@ Item {
                     }
                     onClicked: qAction.trigger()
                 }
+            }
+        }
+
+        ColumnLayout {
+            GroupBox {
+                RowLayout {
+                    ListModel {
+                        id:day
+                    }
+                    ListModel {
+                        id: night
+                    }
+
+                    ExclusiveGroup { id: dn }
+                    RadioButton {
+                        id:foo
+                        text: "Day"
+                        checked: true
+                        exclusiveGroup: dn
+                    }
+                    RadioButton {
+                        id:bar
+                        text: "Night"
+                        exclusiveGroup: dn
+                    }
+                    Button {
+                        text: "Load"
+                        onClicked:function() {
+                            var c=monitorModel.count
+                            var l=dn.current.text==="Day" ? day: night
+                            for(var i=0; i<c; i++) {
+                                var m = l.get(i)
+                                monitorModel.set(i, m)
+
+                                executable.exec(plasmoid.configuration.executable + ` set-brightness ${m.bus_id} ${m.brightness}`)
+                            }
+                            saveData.clear()
+
+                        }
+                    }
+                    Button {
+                        text: "Save"
+                        onClicked: function() {
+                            var c=monitorModel.count
+                            var l=dn.current.text==="Day" ? day: night
+
+                            for(var i=0;i<c; i++) {
+                                l.append(monitorModel.get(i))
+                            }
+
+                        }
+
+                    }
+
+                }
+
             }
         }
 
